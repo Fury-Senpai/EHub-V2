@@ -1,9 +1,10 @@
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+// import axios from 'axios';
+import API from '../../api/axios';
 
 // const API_URL = 'https://ehub-c95q.onrender.com/api/users/';
-const API_URL = 'http://localhost:5000/api/users/';
+// const API_URL = 'http://localhost:5000/api/users/';
 
 
 const user = JSON.parse(localStorage.getItem('user'));
@@ -18,7 +19,7 @@ const initialState = {
 
 export const register = createAsyncThunk('auth/register', async (userData, thunkAPI) => {
   try {
-    const response = await axios.post(API_URL + 'register', userData);
+    const response = await API.post('/users/register', userData); // changing
     if (response.data) {
       localStorage.setItem('user', JSON.stringify(response.data));
     }
@@ -31,7 +32,7 @@ export const register = createAsyncThunk('auth/register', async (userData, thunk
 
 export const login = createAsyncThunk('auth/login', async (userData, thunkAPI) => {
     try {
-      const response = await axios.post(API_URL + 'login', userData);
+      const response = await API.post('/users/login', userData);;
       if (response.data) {
         localStorage.setItem('user', JSON.stringify(response.data));
       }

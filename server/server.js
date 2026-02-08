@@ -33,8 +33,15 @@ mongoose.connect(process.env.DB_URI, {
 
 //      Middleware
 
-// Enable Cross-Origin Resource Sharing (CORS)
-app.use(cors());
+//// Enable Cross-Origin Resource Sharing (CORS)
+// app.use(cors());
+// import cors from 'cors';
+
+app.use(cors({
+  origin: process.env.CLIENT_URL,
+  credentials: true,
+}));
+
 
 // Enable the Express app to parse JSON formatted request bodies
 app.use(express.json());

@@ -1,62 +1,61 @@
-
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-
-// const API_URL = 'https://ehub-c95q.onrender.com/api/orders/';
-const API_URL = 'http://localhost:5000/api/orders/';
-
+import API from '../../api/axios';
 
 const initialState = {
-    orders: [],
-    totalSales: 0,
-    totalRevenue: 0,
-    isError: false,
-    isLoading: false,
-    message: '',
+  orders: [],
+  totalSales: 0,
+  totalRevenue: 0,
+  isError: false,
+  isLoading: false,
+  message: '',
 };
 
-const getToken = (thunkAPI) => {
-    return thunkAPI.getState().auth.user?.token;
-}
+const getToken = (thunkAPI) => thunkAPI.getState().auth.user?.token;
 
-export const getSellerOrders = createAsyncThunk('dashboard/getAllOrders', async (_, thunkAPI) => {
+export const getSellerOrders = createAsyncThunk(
+  'dashboard/getAllOrders',
+  async (_, thunkAPI) => {
     try {
-        const token = getToken(thunkAPI);
-        const config = { headers: { Authorization: `Bearer ${token}` } };
-        const response = await axios.get(API_URL, config);
-        return response.data;
+      const token = getToken(thunkAPI);
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+
+      const response = await API.get('/orders', config);
+      return response.data;
     } catch (error) {
-        const message = (error.response?.data?.message) || error.message;
-        return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || error.message
+      );
     }
-});
+  }
+);
 
 export const dashboardSlice = createSlice({
-    name: 'dashboard',
-    initialState,
-    reducers: {
-        
-        resetDashboard: (state) => initialState,
-    },
-    extraReducers: (builder) => {
-        builder
-            .addCase(getSellerOrders.pending, (state) => {
-                state.isLoading = true;
-            })
-            .addCase(getSellerOrders.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.orders = action.payload;
-                state.totalSales = action.payload.length;
-                state.totalRevenue = action.payload.reduce((acc, order) => acc + order.totalAmount, 0);
-            })
-            .addCase(getSellerOrders.rejected, (state, action) => {
-                state.isLoading = false;
-                state.isError = true;
-                state.message = action.payload;
-            });
-    }
+  name: 'dashboard',
+  initialState,
+  reducers: {
+    resetDashboard: () => initialState,
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getSellerOrders.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getSellerOrders.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.orders = action.payload;
+        state.totalSales = action.payload.length;
+        state.totalRevenue = action.payload.reduce(
+          (acc, order) => acc + order.totalAmount,
+          0
+        );
+      })
+      .addCase(getSellerOrders.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      });
+  },
 });
-
 
 export const { resetDashboard } = dashboardSlice.actions;
 export default dashboardSlice.reducer;
